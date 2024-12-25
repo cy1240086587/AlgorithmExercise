@@ -173,5 +173,198 @@ var isValid = function (s) {
 // 1 <= s.length <= 105
 // s 仅由小写英文字母组成。
 var removeDuplicates = function (s) {
+    let stack = []
+    for (let i = 0; i < s.length; i++) {
+        if (stack[stack.length - 1] != s[i]) {
+            stack.push(s[i])
+        } else {
+            stack.pop()
+        }
+    }
+    let result = stack.join("")
+    return result
+};
 
+// 给你一个字符串数组 tokens ，表示一个根据 逆波兰表示法 表示的算术表达式。
+// 请你计算该表达式。返回一个表示表达式值的整数。
+// 注意：
+// 有效的算符为 '+'、'-'、'*' 和 '/' 。
+// 每个操作数（运算对象）都可以是一个整数或者另一个表达式。
+// 两个整数之间的除法总是 向零截断 。
+// 表达式中不含除零运算。
+// 输入是一个根据逆波兰表示法表示的算术表达式。
+// 答案及所有中间计算结果可以用 32 位 整数表示。
+// 示例 1：
+// 输入：tokens = ["2","1","+","3","*"]
+// 输出：9
+// 解释：该算式转化为常见的中缀算术表达式为：((2 + 1) * 3) = 9
+// 示例 2：
+// 输入：tokens = ["4","13","5","/","+"]
+// 输出：6
+// 解释：该算式转化为常见的中缀算术表达式为：(4 + (13 / 5)) = 6
+// 示例 3：
+// 输入：tokens = ["10","6","9","3","+","-11","*","/","*","17","+","5","+"]
+// 输出：22
+// 解释：该算式转化为常见的中缀算术表达式为：
+//   ((10 * (6 / ((9 + 3) * -11))) + 17) + 5
+// = ((10 * (6 / (12 * -11))) + 17) + 5
+// = ((10 * (6 / -132)) + 17) + 5
+// = ((10 * 0) + 17) + 5
+// = (0 + 17) + 5
+// = 17 + 5
+// = 22
+// 提示：
+// 1 <= tokens.length <= 104
+// tokens[i] 是一个算符（"+"、"-"、"*" 或 "/"），或是在范围 [-200, 200] 内的一个整数
+// 逆波兰表达式：
+// 逆波兰表达式是一种后缀表达式，所谓后缀就是指算符写在后面。
+// 平常使用的算式则是一种中缀表达式，如 ( 1 + 2 ) * ( 3 + 4 ) 。
+// 该算式的逆波兰表达式写法为 ( ( 1 2 + ) ( 3 4 + ) * ) 。
+// 逆波兰表达式主要有以下两个优点：
+// 去掉括号后表达式无歧义，上式即便写成 1 2 + 3 4 + * 也可以依据次序计算出正确结果。
+// 适合用栈操作运算：遇到数字则入栈；遇到算符则取出栈顶两个数字进行计算，并将结果压入栈中
+var evalRPN = function (tokens) {
+    const stack = []
+    for (const token of tokens) {
+        if (isNaN(Number(token))) {
+            const n2 = stack.pop()
+            const n1 = stack.pop()
+            switch (token) {
+                case "+":
+                    stack.push(n1 + n2)
+                    break
+                case "-":
+                    stack.push(n1 - n2)
+                    break
+                case "*":
+                    stack.push(n1 * n2)
+                    break
+                case "/":
+                    stack.push(n1 / n2 | 0)
+                    break
+            }
+        } else {
+            stack.push(Number(token))
+
+        }
+    }
+    return stack[0]
+};
+
+
+// 给你一个整数数组 nums，有一个大小为 k 的滑动窗口从数组的最左侧移动到数组的最右侧。你只可以看到在滑动窗口内的 k 个数字。滑动窗口每次只向右移动一位。
+// 返回 滑动窗口中的最大值 。
+// 示例 1：
+// 输入：nums = [1,3,-1,-3,5,3,6,7], k = 3
+// 输出：[3,3,5,5,6,7]
+// 解释：
+// 滑动窗口的位置                最大值
+// ---------------               -----
+// [1  3  -1] -3  5  3  6  7       3
+//  1 [3  -1  -3] 5  3  6  7       3
+//  1  3 [-1  -3  5] 3  6  7       5
+//  1  3  -1 [-3  5  3] 6  7       5
+//  1  3  -1  -3 [5  3  6] 7       6
+//  1  3  -1  -3  5 [3  6  7]      7
+// 示例 2：
+// 输入：nums = [1], k = 1
+// 输出：[1]
+// 提示：
+// 1 <= nums.length <= 105
+// -104 <= nums[i] <= 104
+// 1 <= k <= nums.length
+var maxSlidingWindow = function (nums, k) {
+    let queue = []
+    let fastIndex = 0
+    let slowIndex = 0
+    let result = []
+
+    while (fastIndex < k) {
+        let back = queue[queue.length - 1]
+        while (back != undefined && back < nums[fastIndex]) {
+            queue.pop()
+            back = queue[queue.length - 1]
+        }
+        queue.push(nums[fastIndex])
+        fastIndex++
+    }
+
+    // 第一次初始化
+    result.push(queue[0])
+
+    while (fastIndex < nums.length) {
+        // 判断窗口移除元素是否为最大值进行处理
+        let front = queue[0]
+        if (nums[slowIndex] == front) {
+            queue.shift()
+        }
+
+        // 判断窗口增加元素处理流程
+        let back = queue[queue.length - 1]
+        while (back != undefined && back < nums[fastIndex]) {
+            queue.pop()
+            back = queue[queue.length - 1]
+        }
+        queue.push(nums[fastIndex])
+
+        result.push(queue[0])
+        fastIndex++
+        slowIndex++
+    }
+
+    return result
+};
+
+
+
+// 给你一个整数数组 nums 和一个整数 k ，请你返回其中出现频率前 k 高的元素。你可以按 任意顺序 返回答案。
+// 示例 1:
+// 输入: nums = [1,1,1,2,2,3], k = 2
+// 输出: [1,2]
+// 示例 2:
+// 输入: nums = [1], k = 1
+// 输出: [1]
+// 提示：
+// 1 <= nums.length <= 105
+// k 的取值范围是 [1, 数组中不相同的元素的个数]
+// 题目数据保证答案唯一，换句话说，数组中前 k 个高频元素的集合是唯一的
+// 进阶：你所设计算法的时间复杂度 必须 优于 O(n log n) ，其中 n 是数组大小。
+var topKFrequent = function (nums, k) {
+    let queue = []
+    let map = new Map()
+
+    for (let i = 0; i < nums.length; i++) {
+        map.set(nums[i], (map.get(nums[i]) || 0) + 1)
+    }
+
+    for (let m of map.keys()) {
+        let item = map.get(m)
+
+        if (queue[0] == undefined || map.get(queue[0]) <= item) {
+            queue.unshift(m)
+        }
+        else if (map.get(queue[queue.length - 1]) >= item) {
+            queue.push(m)
+        }
+        else {
+            queue.unshift(queue[0])
+            let n = 1
+            while (n < queue.length) {
+                if (map.get(queue[n + 1]) < item) {
+                    queue[n] = m
+                    break
+                }
+                queue[n] = queue[n + 1]
+                n++
+            }
+        }
+    }
+
+    let result = []
+
+    for (let j = 0; j < k; j++) {
+        result.push(queue[j])
+    }
+
+    return result
 };
