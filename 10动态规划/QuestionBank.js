@@ -1187,20 +1187,263 @@ var maxUncrossedLines = function (nums1, nums2) {
 // 输入：nums = [5,4,-1,7,8]
 // 输出：23
 var maxSubArray = function (nums) {
-    // let dp = Array(nums.length).fill().map((item) => Array(2).fill(0))
+    let dp = Array(nums.length).fill(-Infinity)
 
-    // // dp[i][0]表示第i个元素在连续数组中时，子数组最大数值
-    // // dp[i][1]表示第i个元素不在连续数组中时，子数组最大数值
+    // dp[i]表示以nums[i]结尾的子序列最大和
+    dp[0] = nums[0]
 
-    // dp[0][0] = nums[0]
-    // dp[0][1] = 0
+    for (let i = 1; i < nums.length; i++) {
+        dp[i] = Math.max(dp[i - 1] + nums[i], nums[i])
+    }
 
-    // for (let i = 1; i < nums.length; i++) {
-    //     dp[i][0] = dp[i - 1][0] + nums[i]
-    //     dp[i][1] = dp[i - 1][1]
-    // }
+    let result = Math.max(...dp)
 
-    // let result = Math.max(dp[nums.length - 1][0], dp[nums.length - 1][1])
-
-    // return result
+    return result
 }
+
+// 给定字符串 s 和 t ，判断 s 是否为 t 的子序列。
+// 字符串的一个子序列是原始字符串删除一些（也可以不删除）字符而不改变剩余字符相对位置形成的新字符串。（例如，"ace"是"abcde"的一个子序列，而"aec"不是）。
+// 进阶：
+// 如果有大量输入的 S，称作 S1, S2, ... , Sk 其中 k >= 10亿，你需要依次检查它们是否为 T 的子序列。在这种情况下，你会怎样改变代码？
+
+// 示例 1：
+// 输入：s = "abc", t = "ahbgdc"
+// 输出：true
+
+// 示例 2：
+// 输入：s = "axc", t = "ahbgdc"
+// 输出：false
+
+var isSubsequence = function (s, t) {
+    let dp = Array(s.length + 1).fill().map((item) => Array(t.length + 1).fill(0))
+
+    // dp[i][j]表示字符串s第i-1个字符为结尾时，是否为字符串t第j-1个字符为结尾时的子序列
+    for (let j = 0; j <= t.length; j++) {
+        dp[0][j] = 1
+    }
+
+    for (let i = 0; i < s.length; i++) {
+        for (let j = 0; j < t.length; j++) {
+            if (s[i] === t[j] && dp[i][j] === 1) {
+                dp[i + 1][j + 1] = 1
+            } else {
+                dp[i + 1][j + 1] = dp[i + 1][j]
+            }
+        }
+    }
+
+    let result = dp[s.length][t.length]
+
+    return result === 1
+};
+
+// 给你两个字符串 s 和 t ，统计并返回在 s 的 子序列 中 t 出现的个数，结果需要对 109 + 7 取模。
+
+// 示例 1：
+// 输入：s = "rabbbit", t = "rabbit"
+// 输出：3
+// 解释：
+// 如下所示, 有 3 种可以从 s 中得到 "rabbit" 的方案。
+// rabbbit
+// rabbbit
+// rabbbit
+
+// 示例 2：
+// 输入：s = "babgbag", t = "bag"
+// 输出：5
+// 解释：
+// 如下所示, 有 5 种可以从 s 中得到 "bag" 的方案。 
+// babgbag
+// babgbag
+// babgbag
+// babgbag
+// babgbag
+var numDistinct = function (s, t) {
+    let dp = Array(s.length + 1).fill().map((item) => Array(t.length + 1).fill(0))
+
+    // dp[i][j]表示指i-1为结尾的s中包含多少个j-1为结尾的t
+    for (let i = 0; i <= s.length; i++) {
+        dp[i][0] = 1
+    }
+
+    for (let i = 0; i < s.length; i++) {
+        for (let j = 0; j < t.length; j++) {
+            if (s[i] === t[j]) {
+                dp[i + 1][j + 1] = dp[i][j] + dp[i][j + 1]
+            } else {
+                dp[i + 1][j + 1] = dp[i][j + 1]
+            }
+        }
+    }
+
+    let result = dp[s.length][t.length]
+
+    return result
+};
+
+// 给定两个单词 word1 和 word2 ，返回使得 word1 和  word2 相同所需的最小步数。
+// 每步 可以删除任意一个字符串中的一个字符。
+
+// 示例 1：
+// 输入: word1 = "sea", word2 = "eat"
+// 输出: 2
+// 解释: 第一步将 "sea" 变为 "ea" ，第二步将 "eat "变为 "ea"
+
+// 示例  2:
+// 输入：word1 = "leetcode", word2 = "etco"
+// 输出：4
+
+var minDistance = function (word1, word2) {
+    let dp = Array(word1.length + 1).fill().map((item) => Array(word2.length + 1).fill(0))
+
+    // dp[i][j]表示指i-1为结尾的word1中需要多少步变为以j-1为结尾的word2
+    for (let i = 0; i <= word1.length; i++) {
+        dp[i][0] = i
+    }
+    for (let j = 0; j <= word2.length; j++) {
+        dp[0][j] = j
+    }
+
+    for (let i = 0; i < word1.length; i++) {
+        for (let j = 0; j < word2.length; j++) {
+            if (word1[i] === word2[j]) {
+                dp[i + 1][j + 1] = dp[i][j]
+            } else {
+                dp[i + 1][j + 1] = Math.min(dp[i][j + 1], dp[i + 1][j]) + 1
+            }
+        }
+    }
+
+    let result = dp[word1.length][word2.length]
+
+    return result
+};
+
+// 给你两个单词 word1 和 word2， 请返回将 word1 转换成 word2 所使用的最少操作数  。
+// 你可以对一个单词进行如下三种操作：
+// 插入一个字符
+// 删除一个字符
+// 替换一个字符
+
+// 示例 1：
+// 输入：word1 = "horse", word2 = "ros"
+// 输出：3
+// 解释：
+// horse -> rorse(将 'h' 替换为 'r')
+// rorse -> rose(删除 'r')
+// rose -> ros(删除 'e')
+
+// 示例 2：
+// 输入：word1 = "intention", word2 = "execution"
+// 输出：5
+// 解释：
+// intention -> inention(删除 't')
+// inention -> enention(将 'i' 替换为 'e')
+// enention -> exention(将 'n' 替换为 'x')
+// exention -> exection(将 'n' 替换为 'c')
+// exection -> execution(插入 'u')
+
+var minDistance = function (word1, word2) {
+    let dp = Array(word1.length + 1).fill().map((item) => Array(word2.length + 1).fill(0))
+
+    // dp[i][j]表示指i-1为结尾的word1需要多少步变为以j-1为结尾的word2
+    for (let i = 0; i <= word1.length; i++) {
+        dp[i][0] = i
+    }
+    for (let j = 0; j <= word2.length; j++) {
+        dp[0][j] = j
+    }
+
+    for (let i = 0; i < word1.length; i++) {
+        for (let j = 0; j < word2.length; j++) {
+            if (word1[i] === word2[j]) {
+                dp[i + 1][j + 1] = dp[i][j]
+            } else {
+                dp[i + 1][j + 1] = Math.min(dp[i][j], dp[i + 1][j], dp[i][j + 1]) + 1
+            }
+        }
+    }
+
+    let result = dp[word1.length][word2.length]
+
+    return result
+};
+
+// 给你一个字符串 s ，请你统计并返回这个字符串中 回文子串 的数目。
+// 回文字符串 是正着读和倒过来读一样的字符串。
+// 子字符串 是字符串中的由连续字符组成的一个序列。
+
+// 示例 1：
+// 输入：s = "abc"
+// 输出：3
+// 解释：三个回文子串: "a", "b", "c"
+
+// 示例 2：
+// 输入：s = "aaa"
+// 输出：6
+// 解释：6个回文子串: "a", "a", "a", "aa", "aa", "aaa"
+
+var countSubstrings = function (s) {
+    let dp = Array(s.length).fill().map((item) => Array(s.length).fill(0))
+
+    let result = 0
+
+    // dp[i][j]表示以i为开头，j为结尾的字符串s是否为回文串
+    for (let i = s.length - 1; i >= 0; i--) {
+        for (let j = i; j < s.length; j++) {
+            if (s[i] === s[j]) {
+                if (i == j) {
+                    dp[i][j] = true
+                    result++
+                } else if (j - i == 1) {
+                    dp[i][j] = true
+                    result++
+                } else {
+                    if (dp[i + 1][j - 1]) {
+                        dp[i][j] = true
+                        result++
+                    }
+                }
+            } else {
+                dp[i][j] = false
+            }
+        }
+    }
+
+    return result
+};
+
+// 给你一个字符串 s ，找出其中最长的回文子序列，并返回该序列的长度。
+// 子序列定义为：不改变剩余字符顺序的情况下，删除某些字符或者不删除任何字符形成的一个序列。
+
+// 示例 1：
+// 输入：s = "bbbab"
+// 输出：4
+// 解释：一个可能的最长回文子序列为 "bbbb" 。
+
+// 示例 2：
+// 输入：s = "cbbd"
+// 输出：2
+// 解释：一个可能的最长回文子序列为 "bb" 。
+
+var longestPalindromeSubseq = function (s) {
+    const strLen = s.length
+    let dp = Array.from(Array(strLen), () => Array(strLen).fill(0));
+
+    for (let i = 0; i < strLen; i++) {
+        dp[i][i] = 1;
+    }
+
+    // dp[i][j]表示以i为开头，j为结尾的字符串s子回文子串的长度
+    for (let i = strLen - 1; i >= 0; i--) {
+        for (let j = i + 1; j < strLen; j++) {
+            if (s[i] === s[j]) {
+                dp[i][j] = dp[i + 1][j - 1] + 2
+            } else {
+                dp[i][j] = Math.max(dp[i][j - 1], dp[i + 1][j])
+            }
+        }
+    }
+
+    return dp[0][strLen - 1]
+};
